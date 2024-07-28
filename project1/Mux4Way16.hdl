@@ -1,0 +1,36 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/1/Mux4Way16.hdl
+/**
+ * 4-way 16-bit multiplexor:
+ * out = a if sel = 00
+ *       b if sel = 01
+ *       c if sel = 10
+ *       d if sel = 11
+ */
+ /*
+ *  4 way 16 bit (bus) multiplexor requiring 2 control inputs 
+ *
+ *  sel[1]  sel[0]  |  out
+ *  0       0       |  a
+ *  0       1       |  b
+ *  1       0       |  c
+ *  1       1       |  d
+ *
+ *  In this case the diagram above is probably the simplest way to understand
+ *  how this actually works. Good old column -t.
+ */
+CHIP Mux4Way16 {
+    IN a[16], b[16], c[16], d[16], sel[2];
+    OUT out[16];
+
+    PARTS:
+    // sel[0] 决定是 a、c 或 d、b
+    Mux16(a=a,b=b,sel=sel[0],out=q); 
+   	Mux16(a=c,b=d,sel=sel[0],out=r);
+    // sel[1] 决定是 两个信号其中之一
+	Mux16(a=q,b=r,sel=sel[1],out=out);
+
+    //// Replace this comment with your code.
+}
