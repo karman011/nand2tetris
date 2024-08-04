@@ -32,45 +32,54 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
+        /* A instruction or C instruction */
         And(a = instruction[15], b = true, out = IsCIns);
-        // if IsCIns == 1 input is C instruction
-
         Not(in = instruction[15], out = IsAIns);
-        // if IsAIns == 1 input is A instruct
 
+        /* When is A instruction OR instruction[5] is on load into A*/
         Or(a = IsAIns, b = instruction[5], out = intoA);
-        //if this is a A instruction or we need write dest A, intoA = true;
+
+        /* if is C instuction the ALU res (might) feed back to A reg */
         Mux16(a = instruction, b = outALU, sel = IsCIns, out = inputA);
-        // if input is C instruction, the out of ALU feedback to A register.
+
+        /* A regiter input */
         ARegister(in = inputA, load = intoA, out = outA, out[0..14] = addressM);
-        // if into a = true, we load A regiter.
+        
+        /* A or M input into ALU decide by istruction[12]; */
         And(a = IsCIns, b = instruction[12], out = AorM);
         Mux16(a = outA, b = inM, sel = AorM, out = AM);
-        // A or M input into ALU decide by istruction[12];
+        
+        /* ALU */
         ALU(x = outD, y = AM, zx = instruction[11], nx = instruction[10], zy = instruction[9], ny = instruction[8], f = instruction[7], no = instruction[6], out = outALU, out = outM, zr = zr, ng = ng);
-        // just input into alu
+        
+        /* D register */
+        /* if is C instruction and instruction[4] = true; write D */
         DRegister(in = outALU, load = intoD, out = outD);
         And(a = IsCIns, b = instruction[4], out = intoD);
-        // if is C instruction and instruction[4] = true;
-        And(a = IsCIns, b = instruction[3], out = writeM);
-        // whether write m?
 
+        /* istruction[3] decide write M */
+        And(a = IsCIns, b = instruction[3], out = writeM);
+        
         Not(in = ng, out = pos);
         Not(in = zr, out = nzr);
         And(a = IsCIns, b = instruction[0], out = jgt);
         And(a = pos, b = nzr, out = posANDnzr);
 
+        /* j1 = true, when jgt and ALU res is positive and not zero */ 
         And(a = jgt, b = posANDnzr, out = j1);
-        // j1 = true, when jgt and ALU res is positive and not zero 
+    
+        // j2 = true when jeq and ALU res is zero
         And(a = IsCIns, b = instruction[1], out = jeq);
         And(a = zr, b = jeq, out = j2);
-        // j2 = true when jeq and ALU res is zero
+        
+        // j3 = true when jls and ALU res is negative
         And(a = instruction[15], b = instruction[2], out = jlt);
         And(a = jlt, b = ng, out = j3);
-        // j3 = true when jls and ALU res is negative
+        
+        // when any of j1, j2, j3 = true, do jump.
         Or(a = j1, b = j2, out = jp);
         Or(a = j3, b = jp, out = finaljp);
-        // when any of j1, j2, j3 = true, do jump.
+
         PC(in = outA, load = finaljp, inc = true, reset = reset, out[0..14] = pc);
 
 	//// Replace this comment with your code.

@@ -115,6 +115,7 @@ void assemble(const std::string& inputFileName, const std::string& outputFileNam
 
     std::string line;
     int lineCounter = 0;
+    
     while (std::getline(inputFile >> std::ws, line)) {
         line = line.substr(0, line.find("//"));
         line.erase(std::find_if(line.rbegin(), line.rend(), [](unsigned char ch) {
