@@ -46,19 +46,26 @@ CHIP ALU {
 	Not16(in = zerox, out = notx);
 	Mux16(a = zerox, b = notx, sel = nx, out = xout);
 
+	// if zy, out = [0,0,0...,0]
 	Mux16(a = y, b[0..15] = false, sel = zy, out = zeroy);
 	Not16(in = zeroy, out = noty);
 	Mux16(a = zeroy, b = noty, sel = ny, out = yout);
 
+	// if f, out = x + y, else out = x & y
 	Add16(a = xout, b = yout, out = xpy);
 	And16(a = xout, b = yout, out = xay);
 
+	// if no, out = !out
 	Mux16(a = xay, b = xpy, sel = f, out = cout);
 	Not16(in = cout, out = ngo);
 	Mux16(a = cout, b = ngo, sel = no, out = out, out[0..7] = finalLeft, out[8..15] = finalRight, out[15] = negsign);
+
+	// if out == 0, zr = 1, else zr = 0
 	Or8Way(in = finalLeft, out = l);
 	Or8Way(in = finalRight, out = r);
 	Or(a = l, b = r, out = zr);
+
+	// if out < 0, ng = 1, else ng = 0
 	And(a = negsign, b = true, out = ng);
     //// Replace this comment with your code.
 }

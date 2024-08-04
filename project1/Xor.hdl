@@ -19,7 +19,7 @@ CHIP Xor {
     * So XOR = NOT( a NAND b NAND b ) OR NOT( a NAND a NAND b);
     *        = NOT( ( a NAND b NAND b) AND ( a NAND a NAND b);
     *        = ( a NAND b NAND b ) NAND (a NAND b NAND a );
-    * NOTE: a NAND b = NOT(a AND b) = NOT(b AND a) = b NAND b; 
+    * NOTE: a NAND b = NOT(a AND b) = NOT(b AND a) = b NAND a; 
     */
     Nand(a = a, b = b, out = aNandb);
     Nand(a = aNandb, b = b, out = aNandbNandb);
